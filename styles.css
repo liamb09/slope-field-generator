@@ -2,6 +2,26 @@
     font-size: 16px;
 }
 
+* {
+    text-align: center;
+}
+
+p {
+    font-size: 20px;
+}
+
+.axis-settings {
+    width: 4rem;
+}
+
+#expression {
+    width: 20rem;
+    height: 2rem;
+}
+#expression::placeholder {
+    text-align: left;
+}
+
 #canvas {
     border: 2px solid black;
     image-rendering: pixelated;

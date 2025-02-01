@@ -6,10 +6,10 @@ function coordToCanvas (x, y, xmin, xmax, ymin, ymax, width, height, margin) {
 }
 
 function drawLine (x1, y1, x2, y2, color, line_width, width, height, ctx, margin) {
-    var xmin = document.getElementById("x-axis-min").value;
-    var xmax = document.getElementById("x-axis-max").value;
-    var ymin = document.getElementById("y-axis-min").value;
-    var ymax = document.getElementById("y-axis-max").value;
+    var xmin = parseInt(document.getElementById("x-axis-min").value);
+    var xmax = parseInt(document.getElementById("x-axis-max").value);
+    var ymin = parseInt(document.getElementById("y-axis-min").value);
+    var ymax = parseInt(document.getElementById("y-axis-max").value);
     ctx.strokeStyle = color;
     ctx.lineWidth = line_width;
     ctx.beginPath();
@@ -77,6 +77,27 @@ function drawAxes (ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, mar
     
 }
 
+function evaluateExpression (expession, x, y) {
+    return x+y;
+}
+
+function drawSlopeField (expression, ctx, width, height, margin) {
+    var xmin = parseInt(document.getElementById("x-axis-min").value);
+    var xmax = parseInt(document.getElementById("x-axis-max").value);
+    var xstep = parseInt(document.getElementById("x-axis-step").value);
+    var ymin = parseInt(document.getElementById("y-axis-min").value);
+    var ymax = parseInt(document.getElementById("y-axis-max").value);
+    var ystep = parseInt(document.getElementById("y-axis-step").value);
+
+    for (var x = xmin; x <= xmax; x += xstep) {
+        for (var y = ymin; y <= ymax; y += ystep) {
+            var currentSlope = evaluateExpression(expression, x, y)
+            var angle = Math.atan(currentSlope)
+            drawLine(x - 0.4*Math.cos(angle), y - 0.4*Math.sin(angle), x + 0.4*Math.cos(angle), y + 0.4*Math.sin(angle), "black", 2, width, height, ctx, margin)
+        }
+    }
+}
+
 function render () {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
@@ -85,11 +106,12 @@ function render () {
     const margin = 50;
     ctx.fillStyle = "white"
     ctx.fillRect(0, 0, width, height)
-    var xmin = document.getElementById("x-axis-min").value;
-    var xmax = document.getElementById("x-axis-max").value;
+    var xmin = parseInt(document.getElementById("x-axis-min").value);
+    var xmax = parseInt(document.getElementById("x-axis-max").value);
     var xstep = parseInt(document.getElementById("x-axis-step").value);
-    var ymin = document.getElementById("y-axis-min").value;
-    var ymax = document.getElementById("y-axis-max").value;
+    var ymin = parseInt(document.getElementById("y-axis-min").value);
+    var ymax = parseInt(document.getElementById("y-axis-max").value);
     var ystep = parseInt(document.getElementById("y-axis-step").value);
-    drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey")
+    drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey");
+    drawSlopeField("xy", ctx, width, height, margin)
 }
