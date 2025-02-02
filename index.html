@@ -24,11 +24,13 @@
             step: <input id="y-axis-step" type="number" value="1" class="axis-settings">
         </p>
         <h2>Expression</h2>
+        <p id="note"><i>There should be no spaces in the expression. Use approximations for &pi; and e.<br>Use parentheses appropriately and around functions (ex: "x*(ln(y))" not "x*ln(y)")</i></p>
         <p>
             <strong><sup>dy</sup>&frasl;<sub>dx</sub> =</strong>
-            <input id="expression" placeholder="Enter a function of x and y...">
+            <!-- onkeyup="render()" -->
+            <input id="expression" placeholder="Enter a function of x and y..." onkeyup="render()">
         </p>
-        <button onclick="render()">Draw</button><br><br>
+        <!-- <button onclick="render()">Draw</button><br><b/r> -->
         <canvas id="canvas" width="800" height="600"></canvas>
     </body>
 </html>

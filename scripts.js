@@ -33,7 +33,6 @@ function drawAxes (ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, mar
     ctx.lineTo(xae[1][0], xae[1][1]);
     ctx.lineTo(xae[1][0]-size, xae[1][1]+size);
     ctx.stroke();
-    console.log(xstep + 2)
     for (var i = 0; i < xmax; i += xstep) {
         ctx.beginPath();
         p = coordToCanvas(i, 0, xmin, xmax, ymin, ymax, width, height, margin)
@@ -77,8 +76,197 @@ function drawAxes (ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, mar
     
 }
 
-function evaluateExpression (expession, x, y) {
-    return x+y;
+function isNumeric (number) {
+    return /^[+-]?\d+(\.\d+)?$/.test(number);
+}
+
+function isAlphabetic (str) {
+    return /^[a-zA-Z]+$/.test(str);
+  }
+
+function toSign (boolean) {
+    return ((+boolean) - 0.5)*2;
+}
+
+function formatMultiDArray (array) {
+    result = "["
+    for (var i = 0; i < array.length; i++) {
+        if (Array.isArray(array[i])) {
+            result += formatMultiDArray(array[i])
+        } else {
+            result += "\"" + array[i] + "\""
+        }
+        if (i+1 < array.length) result += ", ";
+    }
+    return result + "]";
+}
+
+function splitExpression (expression) {
+    // returns [terms, last index] in recursive form
+    var result = [""];
+
+    for (var i = 0; i < expression.length; i++) {
+        var char = expression[i];
+
+        if (char == "(") {
+            var partialResult = splitExpression(expression.slice(i+1));
+            i += partialResult[1] + 1;
+            // if (expression[i] == ")") {
+            //     i++;
+            // }
+            result.push(partialResult[0]);
+            result.push("")
+        } else if (char == ")") {
+            return [result, i];
+        } else if (char == "+" || char == "-") {
+            result.push(char);
+        } else {
+            if (result[result.length-1] == "+" || result[result.length-1] == "-") {
+                result.push("");
+            }
+            result[result.length-1] += "" + char;
+        }
+    }
+
+    return result;
+}
+
+function operate (a, b, operation) {
+    if (operation == "*") return a*b;
+    if (operation == "/") return a/b;
+    if (operation == "^") return a**b;
+}
+
+function evaluateExpression (terms, x, y) {
+    if (expression == "") return 0;
+    if (expression == "x") return x;
+    if (expression == "y") return y;
+
+    // Simplify terms into numbers, +/-, and functions (sqrt, sin, etc)
+    var finalTerms = [];
+    var endsWithOperator = false;
+    var lastTerm = 0;
+    var lastTermOperator = "";
+    var startsWithOperator;
+    var firstOperator = "";
+    terms.forEach((term) => {
+        startsWithOperator = false;
+        if (term == "") {
+            return;
+        }
+        if (Array.isArray(term)) {
+            if (!endsWithOperator) {
+                finalTerms.push(evaluateExpression(term, x, y));
+            } else {
+                finalTerms.push(operate(lastTerm, evaluateExpression(term, x, y), lastTermOperator));
+            }
+            return; // acts like a continue for forEach
+        }
+        if (term == "+" || term == "-" || (isAlphabetic(term) && term != "x" && term != "y")) {
+            finalTerms.push(term);
+            return;
+        }
+        var coefficient = 0;
+        var lastWasCoef = false;
+        var soFar = 1;
+        var operation = "*";
+        for (var i = 0; i < term.length; i++) {
+            var char = term[i];
+
+            if (isNumeric(char)) {
+                if (lastWasCoef) {
+                    coefficient = parseInt(coefficient.toString() + char);
+                } else {
+                    coefficient = parseInt(char);
+                }
+                lastWasCoef = true;
+            } else {
+                if (lastWasCoef) {
+                    soFar = operate(soFar, coefficient, operation);
+                }
+                lastWasCoef = false;
+            }
+            
+            if (char == "*" || char == "/" || char == "^") {
+                operation = char;
+                if (i == 0) {
+                    startsWithOperator = true;
+                    firstOperator = char;
+                    operation = "*";
+                }
+            }
+
+            if (char == "x") {
+                soFar = operate(soFar, x, operation)
+            } else if (char == "y") {
+                soFar = operate(soFar, y, operation)
+            }
+        }
+        if (lastWasCoef) {
+            soFar = operate(soFar, coefficient, operation)
+        }
+        if (term[term.length-1] == "*" || term[term.length-1] == "/" || term[term.length-1] == "^") {
+            endsWithOperator = true;
+            lastTerm = soFar;
+            lastTermOperator = term[term.length-1];
+        } else if (startsWithOperator) {
+            finalTerms[finalTerms.length-1] = operate(finalTerms[finalTerms.length-1], soFar, firstOperator);
+        } else {
+            endsWithOperator = false;
+            finalTerms.push(soFar);
+        }
+    });
+    var result = 0;
+
+    // parse finalTerms
+    var sign = true; // true=positive, false=negative
+    var func = null;
+    for (var i = 0; i < finalTerms.length; i++) {
+        var term = finalTerms[i];
+
+        if (isAlphabetic(term)) {
+            func = term;
+            continue;
+        }
+
+        if (term == "+") {
+            sign = true;
+        } else if (term == "-") {
+            sign = false;
+        } else {
+            var partial;
+            if (func != null) {
+                if (func == "sqrt") {
+                    partial = Math.sqrt(term);
+                } else if (func == "sin") {
+                    partial = Math.sin(term);
+                } else if (func == "cos") {
+                    partial = Math.cos(term);
+                } else if (func == "tan") {
+                    partial = Math.tan(term);
+                } else if (func == "arcsin") {
+                    partial = Math.asin(term);
+                } else if (func == "arccos") {
+                    partial = Math.acos(term);
+                } else if (func == "arctan") {
+                    partial = Math.atan(term);
+                } else if (func == "abs") {
+                    partial = Math.abs(term);
+                } else if (func == "ln") {
+                    partial = Math.log(term);
+                } else {
+                    partial = term;
+                }
+                func = null;
+            } else {
+                partial = term;
+            }
+
+            result += partial * toSign(sign);
+        }
+    }
+
+    return result;
 }
 
 function drawSlopeField (expression, ctx, width, height, margin) {
@@ -89,9 +277,11 @@ function drawSlopeField (expression, ctx, width, height, margin) {
     var ymax = parseInt(document.getElementById("y-axis-max").value);
     var ystep = parseInt(document.getElementById("y-axis-step").value);
 
+    var terms = splitExpression(expression);
+
     for (var x = xmin; x <= xmax; x += xstep) {
         for (var y = ymin; y <= ymax; y += ystep) {
-            var currentSlope = evaluateExpression(expression, x, y)
+            var currentSlope = evaluateExpression(terms, x, y)
             var angle = Math.atan(currentSlope)
             drawLine(x - 0.4*Math.cos(angle), y - 0.4*Math.sin(angle), x + 0.4*Math.cos(angle), y + 0.4*Math.sin(angle), "black", 2, width, height, ctx, margin)
         }
@@ -113,5 +303,5 @@ function render () {
     var ymax = parseInt(document.getElementById("y-axis-max").value);
     var ystep = parseInt(document.getElementById("y-axis-step").value);
     drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey");
-    drawSlopeField("xy", ctx, width, height, margin)
+    drawSlopeField(document.getElementById("expression").value, ctx, width, height, margin)
 }

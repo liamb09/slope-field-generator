@@ -4,19 +4,41 @@
 
 * {
     text-align: center;
+    margin: 0;
+    margin-bottom: 0.5rem;
+}
+
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
 }
 
 p {
-    font-size: 20px;
+    font-size: 1.25rem;
 }
 
 .axis-settings {
     width: 4rem;
 }
 
+#note {
+    color: grey;
+    font-size: 1rem;
+}
+
 #expression {
     width: 20rem;
     height: 2rem;
+    text-align: left;
 }
 #expression::placeholder {
     text-align: left;
