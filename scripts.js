@@ -175,9 +175,9 @@ function evaluateExpression (terms, x, y) {
 
             if (isNumeric(char)) {
                 if (lastWasCoef) {
-                    coefficient = parseInt(coefficient.toString() + char);
+                    coefficient = parseFloat(coefficient.toString() + char);
                 } else {
-                    coefficient = parseInt(char);
+                    coefficient = parseFloat(char);
                 }
                 lastWasCoef = true;
             } else {
@@ -272,10 +272,10 @@ function evaluateExpression (terms, x, y) {
 function drawSlopeField (expression, ctx, width, height, margin) {
     var xmin = parseInt(document.getElementById("x-axis-min").value);
     var xmax = parseInt(document.getElementById("x-axis-max").value);
-    var xstep = parseInt(document.getElementById("x-axis-step").value);
+    var xstep = parseFloat(document.getElementById("x-axis-step").value);
     var ymin = parseInt(document.getElementById("y-axis-min").value);
     var ymax = parseInt(document.getElementById("y-axis-max").value);
-    var ystep = parseInt(document.getElementById("y-axis-step").value);
+    var ystep = parseFloat(document.getElementById("y-axis-step").value);
 
     var terms = splitExpression(expression);
 
@@ -283,7 +283,25 @@ function drawSlopeField (expression, ctx, width, height, margin) {
         for (var y = ymin; y <= ymax; y += ystep) {
             var currentSlope = evaluateExpression(terms, x, y)
             var angle = Math.atan(currentSlope)
-            drawLine(x - 0.4*Math.cos(angle), y - 0.4*Math.sin(angle), x + 0.4*Math.cos(angle), y + 0.4*Math.sin(angle), "black", 2, width, height, ctx, margin)
+            var x1;
+            var y1;
+            var x2;
+            var y2;
+            if (xstep < 1) {
+                x1 = x - 0.4*Math.cos(angle)*xstep
+                x2 = x + 0.4*Math.cos(angle)*xstep
+            } else {
+                x1 = x - 0.4*Math.cos(angle)
+                x2 = x + 0.4*Math.cos(angle)
+            }
+            if (ystep < 1) {
+                y1 = y - 0.4*Math.sin(angle)*ystep
+                y2 = y + 0.4*Math.sin(angle)*ystep
+            } else {
+                y1 = y - 0.4*Math.sin(angle)
+                y2 = y + 0.4*Math.sin(angle)
+            }
+            drawLine(x1, y1, x2, y2, "black", 2, width, height, ctx, margin)
         }
     }
 }
@@ -298,10 +316,11 @@ function render () {
     ctx.fillRect(0, 0, width, height)
     var xmin = parseInt(document.getElementById("x-axis-min").value);
     var xmax = parseInt(document.getElementById("x-axis-max").value);
-    var xstep = parseInt(document.getElementById("x-axis-step").value);
+    var xstep = parseFloat(document.getElementById("x-axis-step").value);
     var ymin = parseInt(document.getElementById("y-axis-min").value);
     var ymax = parseInt(document.getElementById("y-axis-max").value);
-    var ystep = parseInt(document.getElementById("y-axis-step").value);
+    var ystep = parseFloat(document.getElementById("y-axis-step").value);
+    if (xstep == 0 || ystep == 0) return;
     drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey");
     drawSlopeField(document.getElementById("expression").value, ctx, width, height, margin)
 }

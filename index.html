@@ -13,15 +13,15 @@
         <h1>Slope Field Generator</h1>
         <h2>X-Axis</h2>
         <p>
-            min: <input id="x-axis-min" type="number" value="-10" class="axis-settings">
-            max: <input id="x-axis-max" type="number" value="10" class="axis-settings">
-            step: <input id="x-axis-step" type="number" value="1" class="axis-settings">
+            min: <input id="x-axis-min" type="number" value="-10" class="axis-settings" onkeyup="render()" onchange="render()">
+            max: <input id="x-axis-max" type="number" value="10" class="axis-settings" onkeyup="render()" onchange="render()">
+            step: <input id="x-axis-step" type="number" value="1" min="0.1" class="axis-settings" onkeyup="render()" onchange="render()">
         </p>
         <h2>Y-Axis</h2>
         <p>
-            min: <input id="y-axis-min" type="number" value="-10" class="axis-settings">
-            max: <input id="y-axis-max" type="number" value="10" class="axis-settings">
-            step: <input id="y-axis-step" type="number" value="1" class="axis-settings">
+            min: <input id="y-axis-min" type="number" value="-10" class="axis-settings" onkeyup="render()" onchange="render()">
+            max: <input id="y-axis-max" type="number" value="10" class="axis-settings" onkeyup="render()" onchange="render()">
+            step: <input id="y-axis-step" type="number" value="1" min="0.1" class="axis-settings" onkeyup="render()" onchange="render()">
         </p>
         <h2>Expression</h2>
         <p id="note"><i>There should be no spaces in the expression. Use approximations for &pi; and e.<br>Use parentheses appropriately and around functions (ex: "x*(ln(y))" not "x*ln(y)")</i></p>
