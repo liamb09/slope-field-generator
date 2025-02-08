@@ -31,7 +31,18 @@
             <!-- onkeyup="render()" -->
             <input id="expression" placeholder="Enter a function of x and y..." onkeyup="render()">
         </p>
+        <h2>Render Particular Solution</h2>
+        <p id="note"><i>Estimation using Euler's Method</i></p>
+        <p>
+            Initial Condition: ( 
+                <input id="solution-x" placeholder="X" type="number" class="solution-input" onkeyup="render()" onchange="render()"> ,  
+                <input id="solution-y" placeholder="Y" type="number" class="solution-input" onkeyup="render()" onchange="render()"> 
+            ) <br>  
+            Step: <input id="solution-step" type="number" min="0.1" step="0.1" class="solution-input" onkeyup="render()" onchange="render()"> 
+        </p>
+        
+
         <!-- <button onclick="render()">Draw</button><br><b/r> -->
-        <canvas id="canvas" width="800" height="600"></canvas>
+        <canvas id="canvas" width="800" height="500"></canvas>
     </body>
 </html>

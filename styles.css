@@ -44,6 +44,15 @@ p {
     text-align: left;
 }
 
+.solution-input {
+    width: 3rem;
+    text-align: left;
+}
+
+.solution-input::placeholder {
+    text-align: left;
+}
+
 #canvas {
     border: 2px solid black;
     image-rendering: pixelated;

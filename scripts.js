@@ -224,7 +224,7 @@ function evaluateExpression (terms, x, y) {
     for (var i = 0; i < finalTerms.length; i++) {
         var term = finalTerms[i];
 
-        if (isAlphabetic(term)) {
+        if (isAlphabetic(term) && !(term == Number.POSITIVE_INFINITY || term == Number.NEGATIVE_INFINITY)) {
             func = term;
             continue;
         }
@@ -281,28 +281,58 @@ function drawSlopeField (expression, ctx, width, height, margin) {
 
     for (var x = xmin; x <= xmax; x += xstep) {
         for (var y = ymin; y <= ymax; y += ystep) {
-            var currentSlope = evaluateExpression(terms, x, y)
-            var angle = Math.atan(currentSlope)
+            var currentSlope = evaluateExpression(terms, x, y);
+            var angle = Math.atan(currentSlope);
             var x1;
             var y1;
             var x2;
             var y2;
             if (xstep < 1) {
-                x1 = x - 0.4*Math.cos(angle)*xstep
-                x2 = x + 0.4*Math.cos(angle)*xstep
+                x1 = x - 0.4*Math.cos(angle)*xstep;
+                x2 = x + 0.4*Math.cos(angle)*xstep;
             } else {
-                x1 = x - 0.4*Math.cos(angle)
-                x2 = x + 0.4*Math.cos(angle)
+                x1 = x - 0.4*Math.cos(angle);
+                x2 = x + 0.4*Math.cos(angle);
             }
             if (ystep < 1) {
-                y1 = y - 0.4*Math.sin(angle)*ystep
-                y2 = y + 0.4*Math.sin(angle)*ystep
+                y1 = y - 0.4*Math.sin(angle)*ystep;
+                y2 = y + 0.4*Math.sin(angle)*ystep;
             } else {
-                y1 = y - 0.4*Math.sin(angle)
-                y2 = y + 0.4*Math.sin(angle)
+                y1 = y - 0.4*Math.sin(angle);
+                y2 = y + 0.4*Math.sin(angle);
             }
-            drawLine(x1, y1, x2, y2, "black", 2, width, height, ctx, margin)
+            drawLine(x1, y1, x2, y2, "black", 2, width, height, ctx, margin);
         }
+    }
+}
+
+function drawParticularSolution (ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, sx, sy, step) {
+    var currentY = sy;
+    for (var currentX = sx; currentX <= xmax; currentX += step) {
+        var currentSlope = evaluateExpression(splitExpression(expression), currentX, currentY);
+        if (currentSlope > Math.abs(ymin - ymax) || currentSlope < -Math.abs(ymin - ymax)) {
+            break;
+        }
+        x1 = currentX;
+        x2 = currentX + step;
+        y1 = currentY;
+        y2 = currentY + step*currentSlope;
+        drawLine(x1, y1, x2, y2, "red", 2, width, height, ctx, margin);
+        currentY = y2;
+    }
+
+    var currentY = sy;
+    for (var currentX = sx; currentX >= xmin; currentX -= step) {
+        var currentSlope = evaluateExpression(splitExpression(expression), currentX, currentY);
+        if (currentSlope > Math.abs(ymin - ymax) || currentSlope < -Math.abs(ymin - ymax)) {
+            break;
+        }
+        x1 = currentX;
+        x2 = currentX - step;
+        y1 = currentY;
+        y2 = currentY - step*currentSlope;
+        drawLine(x1, y1, x2, y2, "red", 2, width, height, ctx, margin);
+        currentY = y2;
     }
 }
 
@@ -320,7 +350,15 @@ function render () {
     var ymin = parseInt(document.getElementById("y-axis-min").value);
     var ymax = parseInt(document.getElementById("y-axis-max").value);
     var ystep = parseFloat(document.getElementById("y-axis-step").value);
-    if (xstep == 0 || ystep == 0) return;
+    var expression = document.getElementById("expression").value;
+    if (xstep == 0 || ystep == 0 || expression == "") return;
     drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey");
-    drawSlopeField(document.getElementById("expression").value, ctx, width, height, margin)
+    drawSlopeField(expression, ctx, width, height, margin)
+
+    var solutionX = parseFloat(document.getElementById("solution-x").value);
+    var solutionY = parseFloat(document.getElementById("solution-y").value);
+    var solutionStep = parseFloat(document.getElementById("solution-step").value);
+    if (!isNaN(solutionX) && !isNaN(solutionY) && !isNaN(solutionStep) && solutionStep != 0) {
+        drawParticularSolution(ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, solutionX, solutionY, solutionStep);
+    }
 }
