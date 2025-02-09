@@ -24,15 +24,17 @@
             max: <input id="y-axis-max" type="number" value="10" class="axis-settings" onkeyup="render()" onchange="render()">
             step: <input id="y-axis-step" type="number" value="1" min="0.1" class="axis-settings" onkeyup="render()" onchange="render()">
         </p>
+
         <h2>Expression</h2>
         <p id="note"><i>There should be no spaces in the expression. Use approximations for &pi; and e.<br>Use parentheses appropriately and around functions (ex: "x*(ln(y))" not "x*ln(y)")</i></p>
         <p>
             <strong><sup>dy</sup>&frasl;<sub>dx</sub> =</strong>
             <!-- onkeyup="render()" -->
-            <input id="expression" placeholder="Enter a function of x and y..." onkeyup="render()">
+            <input id="differential-equation" placeholder="Enter a function of x and y..." class="expression-input" onkeyup="render()">
         </p>
+
         <h2>Render Particular Solution</h2>
-        <p id="note"><i>Estimation using Euler's Method</i></p>
+        <p id="note"><i>Estimation using Euler's Method (red)</i></p>
         <p>
             Initial Condition: ( 
                 <input id="solution-x" placeholder="X" type="number" class="solution-input" onkeyup="render()" onchange="render()"> ,  
@@ -40,7 +42,8 @@
             ) <br>  
             Step: <input id="solution-step" type="number" min="0.1" step="0.1" class="solution-input" onkeyup="render()" onchange="render()"> 
         </p>
-        
+        <p id="note"><i>Check a particular solution (blue)</i></p>
+        <p><strong>y = </strong><input id="solution-guess" placeholder="Enter a function of x..." class="expression-input" onkeyup="render()"></p>
 
         <!-- <button onclick="render()">Draw</button><br><b/r> -->
         <canvas id="canvas" width="800" height="500"></canvas>

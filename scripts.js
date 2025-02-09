@@ -138,9 +138,9 @@ function operate (a, b, operation) {
 }
 
 function evaluateExpression (terms, x, y) {
-    if (expression == "") return 0;
-    if (expression == "x") return x;
-    if (expression == "y") return y;
+    if (terms.length == 0) return 0;
+    if (terms.length == 1 && terms[0] == "x") return x;
+    if (terms.length == 1 && terms[0] == "y") return y;
 
     // Simplify terms into numbers, +/-, and functions (sqrt, sin, etc)
     var finalTerms = [];
@@ -283,30 +283,16 @@ function drawSlopeField (expression, ctx, width, height, margin) {
         for (var y = ymin; y <= ymax; y += ystep) {
             var currentSlope = evaluateExpression(terms, x, y);
             var angle = Math.atan(currentSlope);
-            var x1;
-            var y1;
-            var x2;
-            var y2;
-            if (xstep < 1) {
-                x1 = x - 0.4*Math.cos(angle)*xstep;
-                x2 = x + 0.4*Math.cos(angle)*xstep;
-            } else {
-                x1 = x - 0.4*Math.cos(angle);
-                x2 = x + 0.4*Math.cos(angle);
-            }
-            if (ystep < 1) {
-                y1 = y - 0.4*Math.sin(angle)*ystep;
-                y2 = y + 0.4*Math.sin(angle)*ystep;
-            } else {
-                y1 = y - 0.4*Math.sin(angle);
-                y2 = y + 0.4*Math.sin(angle);
-            }
+            var x1 = x - 0.4*Math.cos(angle)*xstep;
+            var x2 = x + 0.4*Math.cos(angle)*xstep;
+            var y1 = y - 0.4*Math.sin(angle)*ystep;
+            var y2 = y + 0.4*Math.sin(angle)*ystep;
             drawLine(x1, y1, x2, y2, "black", 2, width, height, ctx, margin);
         }
     }
 }
 
-function drawParticularSolution (ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, sx, sy, step) {
+function drawEstimatedParticularSolution (ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, sx, sy, step) {
     var currentY = sy;
     for (var currentX = sx; currentX <= xmax; currentX += step) {
         var currentSlope = evaluateExpression(splitExpression(expression), currentX, currentY);
@@ -336,6 +322,20 @@ function drawParticularSolution (ctx, expression, width, height, margin, xmin, x
     }
 }
 
+function drawExpression (ctx, expression, width, height, margin, xmin, xmax) {
+    var step = 0.05;
+    var lastX = xmin;
+    var lastY = evaluateExpression(splitExpression(expression), xmin, 0);
+    for (var x = xmin; x <= xmax; x += step) {
+        var y = evaluateExpression(splitExpression(expression), x, 0);
+        if (!isNaN(y) && !isNaN(lastY)) {
+            drawLine(lastX, lastY, x, y, "blue", 2, width, height, ctx, margin);
+        }
+        lastX = x;
+        lastY = y;
+    }
+}
+
 function render () {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
@@ -350,7 +350,7 @@ function render () {
     var ymin = parseInt(document.getElementById("y-axis-min").value);
     var ymax = parseInt(document.getElementById("y-axis-max").value);
     var ystep = parseFloat(document.getElementById("y-axis-step").value);
-    var expression = document.getElementById("expression").value;
+    var expression = document.getElementById("differential-equation").value;
     if (xstep == 0 || ystep == 0 || expression == "") return;
     drawAxes(ctx, width, height, xmin, xmax, xstep, ymin, ymax, ystep, margin, 8, "grey");
     drawSlopeField(expression, ctx, width, height, margin)
@@ -359,6 +359,10 @@ function render () {
     var solutionY = parseFloat(document.getElementById("solution-y").value);
     var solutionStep = parseFloat(document.getElementById("solution-step").value);
     if (!isNaN(solutionX) && !isNaN(solutionY) && !isNaN(solutionStep) && solutionStep != 0) {
-        drawParticularSolution(ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, solutionX, solutionY, solutionStep);
+        drawEstimatedParticularSolution(ctx, expression, width, height, margin, xmin, xmax, ymin, ymax, solutionX, solutionY, solutionStep);
+    }
+    var solutionGuess = document.getElementById("solution-guess").value;
+    if (solutionGuess != "") {
+        drawExpression(ctx, solutionGuess, width, height, margin, xmin, xmax)
     }
 }
